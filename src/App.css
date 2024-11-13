@@ -36,3 +36,20 @@
     transform: rotate(360deg);
   }
 }
+#drop-area {
+  width: 80%;
+  height: 150px;
+  border: 2px dashed #4caf50; /* Green dashed border */
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  color: #fff;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+#drop-area:hover {
+  background-color: #333; /* Darker background on hover */
+  border-color: #45a049; /* Darker green */
+}
