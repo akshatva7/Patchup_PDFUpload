@@ -1,5 +1,6 @@
 // src/App.jsx
 import React from 'react';
+
 import DropArea from './components/DropArea';
 import {
   Typography,
@@ -9,6 +10,7 @@ import {
 import LogoutIcon from '@mui/icons-material/Logout';
 
 function App() {
+ 
   return (
     <Box
       sx={{

@@ -1,19 +1,17 @@
 // src/components/DropArea.jsx
 import React, { useState } from 'react';
-import {
-  Box,
-  Typography,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  CircularProgress,
-  Alert,
-} from '@mui/material';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 const DropArea = () => {
@@ -21,7 +19,7 @@ const DropArea = () => {
   const [geminiData, setGeminiData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-
+  
   const handleDragOver = (event) => {
     event.preventDefault(); // Prevent default behavior (Prevent file from being opened)
     event.stopPropagation();
@@ -57,8 +55,8 @@ const DropArea = () => {
     try {
       const formData = new FormData();
       formData.append('pdf', file);
-
-      const response = await fetch('http://localhost:5000/upload', { // Ensure the URL and port match your server configuration
+      const fetchurl = "https://patchuppdf-upload-backend.onrender.com" + "/upload";
+      const response = await fetch(fetchurl, { // Ensure the URL and port match your server configuration
         method: 'POST',
         body: formData,
       });
