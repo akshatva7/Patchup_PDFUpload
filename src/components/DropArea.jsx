@@ -1,4 +1,3 @@
-// src/components/DropArea.jsx
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -12,8 +11,6 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 const DropArea = () => {
@@ -21,7 +18,6 @@ const DropArea = () => {
   const [geminiData, setGeminiData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  const [selectedInstrument, setSelectedInstrument] = useState('');
 
   const handleDragOver = (event) => {
     event.preventDefault();
@@ -90,28 +86,28 @@ const DropArea = () => {
     );
   };
 
-  const renderInstrumentsDropdown = () => {
+  const renderInstrumentsAndBacklines = () => {
     if (!geminiData?.instruments_and_backlines?.length) return null;
+
     return (
       <Box sx={{ mt: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Instruments and Backline
         </Typography>
-        <Select
-          value={selectedInstrument}
-          onChange={(e) => setSelectedInstrument(e.target.value)}
-          displayEmpty
-          fullWidth
-        >
-          <MenuItem value="" disabled>
-            Select an instrument
-          </MenuItem>
-          {geminiData.instruments_and_backlines.map((instrument, index) => (
-            <MenuItem key={index} value={instrument}>
-              {instrument}
-            </MenuItem>
-          ))}
-        </Select>
+        {geminiData.instruments_and_backlines.map((sectionData, index) => (
+          <Box key={index} sx={{ mt: 3 }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+              {sectionData.section}
+            </Typography>
+            <ul>
+              {sectionData.items.map((item, idx) => (
+                <li key={idx}>
+                  <Typography variant="body2">{item}</Typography>
+                </li>
+              ))}
+            </ul>
+          </Box>
+        ))}
       </Box>
     );
   };
@@ -259,7 +255,7 @@ const DropArea = () => {
       {geminiData && (
         <>
           {renderMainArtist()}
-          {renderInstrumentsDropdown()}
+          {renderInstrumentsAndBacklines()}
           {renderPatchListTable()}
         </>
       )}
