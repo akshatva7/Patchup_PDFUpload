@@ -12,6 +12,8 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
 
 const DropArea = () => {
@@ -19,23 +21,24 @@ const DropArea = () => {
   const [geminiData, setGeminiData] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
   const [isUploading, setIsUploading] = useState(false);
-  
+  const [selectedInstrument, setSelectedInstrument] = useState('');
+
   const handleDragOver = (event) => {
-    event.preventDefault(); // Prevent default behavior (Prevent file from being opened)
+    event.preventDefault();
     event.stopPropagation();
-    event.dataTransfer.dropEffect = 'copy'; // Visual feedback
+    event.dataTransfer.dropEffect = 'copy';
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     event.stopPropagation();
-    setErrorMessage(''); // Reset any previous error messages
-    setGeminiData(null); // Reset previous Gemini data
-    setUploadMessage(''); // Reset previous upload messages
+    setErrorMessage('');
+    setGeminiData(null);
+    setUploadMessage('');
 
     const files = event.dataTransfer.files;
     if (files && files.length > 0) {
-      const file = files[0]; // Assuming single file drop, but can be extended for multiple files
+      const file = files[0];
       if (validateFile(file)) {
         uploadFile(file);
       } else {
@@ -55,14 +58,14 @@ const DropArea = () => {
     try {
       const formData = new FormData();
       formData.append('pdf', file);
-      const fetchurl = "https://patchuppdf-upload-backend.onrender.com" + "/upload";
-      const response = await fetch(fetchurl, { // Ensure the URL and port match your server configuration
+      const fetchurl = "https://patchuppdf-upload-backend.onrender.com/upload";
+      const response = await fetch(fetchurl, {
         method: 'POST',
         body: formData,
       });
 
       const data = await response.json();
-      console.log('Received data from backend:', data); // Debugging: Check the received data
+      console.log('Received data from backend:', data);
 
       if (response.ok) {
         setUploadMessage(data.uploadConfirmation || 'File uploaded successfully.');
@@ -78,126 +81,91 @@ const DropArea = () => {
     }
   };
 
-  const renderGeminiTable = () => {
-    if (!geminiData) return null;
-    console.log('Rendering Data:', geminiData); // Debugging: Check geminiData
+  const renderMainArtist = () => {
+    if (!geminiData?.main_artist) return null;
+    return (
+      <Typography variant="h6" sx={{ mt: 4 }}>
+        Main Artist: {geminiData.main_artist}
+      </Typography>
+    );
+  };
 
-    // Determine if geminiData is an object with sections or an array
-    if (typeof geminiData === 'object' && !Array.isArray(geminiData)) {
-      // geminiData is an object with sections
-      const sectionKeys = Object.keys(geminiData);
-      if (sectionKeys.length === 0) return null;
+  const renderInstrumentsDropdown = () => {
+    if (!geminiData?.instruments_and_backlines?.length) return null;
+    return (
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Instruments and Backline
+        </Typography>
+        <Select
+          value={selectedInstrument}
+          onChange={(e) => setSelectedInstrument(e.target.value)}
+          displayEmpty
+          fullWidth
+        >
+          <MenuItem value="" disabled>
+            Select an instrument
+          </MenuItem>
+          {geminiData.instruments_and_backlines.map((instrument, index) => (
+            <MenuItem key={index} value={instrument}>
+              {instrument}
+            </MenuItem>
+          ))}
+        </Select>
+      </Box>
+    );
+  };
 
-      return sectionKeys.map((section) => {
-        const items = geminiData[section];
-        if (!Array.isArray(items) || items.length === 0) return null;
+  const renderPatchListTable = () => {
+    if (!geminiData?.patch_list_table?.length) return null;
 
-        // Extract table headers from the first item's keys
-        const headers = Object.keys(items[0]);
+    const headers = Object.keys(geminiData.patch_list_table[0]);
 
-        return (
-          <Box key={section} sx={{ mt: 4, width: '100%' }}>
-            <Typography variant="h4" align="center" color="primary" sx={{ mb: 2 }}>
-              {section}
-            </Typography>
-            <TableContainer component={Paper}>
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    {headers.map((header) => (
-                      <TableCell
-                        key={header}
-                        sx={{
-                          backgroundColor: '#4caf50', // Green color as per CSS
-                          color: 'white',
-                          fontWeight: 'bold',
-                        }}
-                      >
-                        {header}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {items.map((item, index) => (
-                    <TableRow
-                      key={index}
-                      sx={{
-                        backgroundColor: index % 2 === 0 ? '#f2f2f2' : 'white',
-                      }}
-                    >
-                      {headers.map((header) => (
-                        <TableCell key={header}>{item[header]}</TableCell>
-                      ))}
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
-        );
-      });
-    } else if (Array.isArray(geminiData)) {
-      // geminiData is an array
-      if (geminiData.length === 0) return null;
-
-      // Extract table headers from the first item's keys
-      const headers = Object.keys(geminiData[0]);
-
-      return (
-        <Box sx={{ mt: 4, width: '100%' }}>
-          <Typography variant="h6" align="center" color="primary" sx={{ mb: 2 }}>
-            Patchlist
-          </Typography>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  {headers.map((header) => (
-                    <TableCell
-                      key={header}
-                      sx={{
-                        backgroundColor: '#4caf50', // Green color as per CSS
-                        color: 'white',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      {header}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {geminiData.map((item, index) => (
-                  <TableRow
-                    key={index}
+    return (
+      <Box sx={{ mt: 4, width: '100%' }}>
+        <Typography variant="h6" align="center" sx={{ mb: 2 }}>
+          Patch List Table
+        </Typography>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {headers.map((header) => (
+                  <TableCell
+                    key={header}
                     sx={{
-                      backgroundColor: index % 2 === 0 ? '#f2f2f2' : 'white',
+                      backgroundColor: '#4caf50',
+                      color: 'white',
+                      fontWeight: 'bold',
                     }}
                   >
-                    {headers.map((header) => (
-                      <TableCell key={header}>{item[header]}</TableCell>
-                    ))}
-                  </TableRow>
+                    {header}
+                  </TableCell>
                 ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      );
-    } else {
-      // Unexpected geminiData structure
-      return (
-        <Alert severity="warning" sx={{ mt: 4 }}>
-          Unexpected Gemini data format.
-        </Alert>
-      );
-    }
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {geminiData.patch_list_table.map((row, index) => (
+                <TableRow
+                  key={index}
+                  sx={{
+                    backgroundColor: index % 2 === 0 ? '#f2f2f2' : 'white',
+                  }}
+                >
+                  {headers.map((header) => (
+                    <TableCell key={header}>{row[header]}</TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
   };
 
   return (
     <Box sx={{ width: '100%', mx: 'auto', mt: 4 }}>
-      {/* Drop Area */}
       <Box
         id="drop-area"
         onDragOver={handleDragOver}
@@ -206,13 +174,13 @@ const DropArea = () => {
           width: '100%',
           height: '250px',
           border: '2px dashed',
-          borderColor: '#4caf50', // Green color as per CSS
+          borderColor: '#4caf50',
           borderRadius: '10px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#4caf50', // Green text
-          backgroundColor: '#f9fff9', // Light background
+          color: '#4caf50',
+          backgroundColor: '#f9fff9',
           position: 'relative',
           textAlign: 'center',
         }}
@@ -225,7 +193,7 @@ const DropArea = () => {
               left: 0,
               width: '100%',
               height: '100%',
-              bgcolor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent overlay
+              bgcolor: 'rgba(255, 255, 255, 0.8)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -277,22 +245,24 @@ const DropArea = () => {
         </Box>
       </Box>
 
-      {/* Upload Confirmation Message */}
       {uploadMessage && (
         <Alert severity="success" sx={{ mt: 2 }}>
           {uploadMessage}
         </Alert>
       )}
-
-      {/* Error Message */}
       {errorMessage && (
         <Alert severity="error" sx={{ mt: 2 }}>
           {errorMessage}
         </Alert>
       )}
 
-      {/* Gemini Response Table */}
-      {geminiData && renderGeminiTable()}
+      {geminiData && (
+        <>
+          {renderMainArtist()}
+          {renderInstrumentsDropdown()}
+          {renderPatchListTable()}
+        </>
+      )}
     </Box>
   );
 };
