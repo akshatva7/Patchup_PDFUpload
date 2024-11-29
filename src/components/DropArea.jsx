@@ -92,54 +92,43 @@ const DropArea = () => {
 
     const instruments = geminiData.instruments_and_backlines;
 
-    if (Array.isArray(instruments)) {
-      if (typeof instruments[0] === 'string') {
-        // Case: instruments_and_backlines is a flat array of strings
-        return (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Instruments and Backline
-            </Typography>
-            <ul>
-              {instruments.map((item, index) => (
-                <li key={index}>
-                  <Typography variant="body2">{item}</Typography>
-                </li>
-              ))}
-            </ul>
-          </Box>
-        );
-      } else if (typeof instruments[0] === 'object' && instruments[0].section && instruments[0].items) {
-        // Case: instruments_and_backlines is an array of objects with `section` and `items`
-        return (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
-              Instruments and Backline
-            </Typography>
-            {instruments.map((sectionData, index) => (
-              <Box key={index} sx={{ mt: 3 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-                  {sectionData.section}
-                </Typography>
-                <ul>
-                  {sectionData.items.map((item, idx) => (
-                    <li key={idx}>
-                      <Typography variant="body2">{item}</Typography>
-                    </li>
-                  ))}
-                </ul>
-              </Box>
-            ))}
-          </Box>
-        );
-      }
-    }
-
-    // Handle unexpected structure gracefully
     return (
-      <Alert severity="warning" sx={{ mt: 4 }}>
-        Unexpected format for instruments and backlines.
-      </Alert>
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Instruments and Backline
+        </Typography>
+        {Array.isArray(instruments) ? (
+          instruments.map((item, index) => {
+            if (typeof item === 'string') {
+              // Case: Flat array of strings
+              return (
+                <Typography key={index} variant="body2" sx={{ mb: 1 }}>
+                  - {item}
+                </Typography>
+              );
+            } else if (typeof item === 'object' && item.section && item.items) {
+              // Case: Structured array with sections and items
+              return (
+                <Box key={index} sx={{ mt: 3 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                    {item.section}
+                  </Typography>
+                  <ul>
+                    {item.items.map((subItem, subIndex) => (
+                      <li key={subIndex}>
+                        <Typography variant="body2">{subItem}</Typography>
+                      </li>
+                    ))}
+                  </ul>
+                </Box>
+              );
+            }
+            return null; // Skip unexpected formats
+          })
+        ) : (
+          <Alert severity="warning">Unexpected format for instruments and backlines.</Alert>
+        )}
+      </Box>
     );
   };
 
