@@ -1,3 +1,4 @@
+// src/components/DropArea.jsx
 import React, { useState } from 'react';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
@@ -87,28 +88,58 @@ const DropArea = () => {
   };
 
   const renderInstrumentsAndBacklines = () => {
-    if (!geminiData?.instruments_and_backlines?.length) return null;
+    if (!geminiData?.instruments_and_backlines) return null;
 
-    return (
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" sx={{ mb: 2 }}>
-          Instruments and Backline
-        </Typography>
-        {geminiData.instruments_and_backlines.map((sectionData, index) => (
-          <Box key={index} sx={{ mt: 3 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
-              {sectionData.section}
+    const instruments = geminiData.instruments_and_backlines;
+
+    if (Array.isArray(instruments)) {
+      if (typeof instruments[0] === 'string') {
+        // Case: instruments_and_backlines is a flat array of strings
+        return (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Instruments and Backline
             </Typography>
             <ul>
-              {sectionData.items.map((item, idx) => (
-                <li key={idx}>
+              {instruments.map((item, index) => (
+                <li key={index}>
                   <Typography variant="body2">{item}</Typography>
                 </li>
               ))}
             </ul>
           </Box>
-        ))}
-      </Box>
+        );
+      } else if (typeof instruments[0] === 'object' && instruments[0].section && instruments[0].items) {
+        // Case: instruments_and_backlines is an array of objects with `section` and `items`
+        return (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Instruments and Backline
+            </Typography>
+            {instruments.map((sectionData, index) => (
+              <Box key={index} sx={{ mt: 3 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 'bold', mb: 1 }}>
+                  {sectionData.section}
+                </Typography>
+                <ul>
+                  {sectionData.items.map((item, idx) => (
+                    <li key={idx}>
+                      <Typography variant="body2">{item}</Typography>
+                    </li>
+                  ))}
+                </ul>
+              </Box>
+            ))}
+          </Box>
+        );
+      }
+    }
+
+    // Handle unexpected structure gracefully
+    return (
+      <Alert severity="warning" sx={{ mt: 4 }}>
+        Unexpected format for instruments and backlines.
+      </Alert>
     );
   };
 
